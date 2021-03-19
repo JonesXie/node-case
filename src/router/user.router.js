@@ -1,10 +1,11 @@
 const Router = require("koa-router");
 const { create } = require("../controller/user.controller");
-const { verifyUser } = require("../middleware/user.middleware");
+const { verifyUser, handlePassword } = require("../middleware/user.middleware");
 
 const userRouter = new Router({ prefix: "/user" });
 
-userRouter.post("/", verifyUser, create);
+userRouter.post("/", verifyUser, handlePassword, create);
+
 // userRouter.get("/:userId", (ctx, next) => {
 //   ctx.body = "添加成功";
 // });
