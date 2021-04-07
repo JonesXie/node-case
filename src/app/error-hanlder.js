@@ -1,5 +1,6 @@
 const errorTypes = require("../constants/error-types");
 
+/**错误信息处理 */
 const errorHandler = (error, ctx) => {
   let status, message;
 

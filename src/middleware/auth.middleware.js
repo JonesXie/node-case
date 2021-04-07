@@ -1,7 +1,13 @@
+const jwt = require("jsonwebtoken");
+
 const errorTypes = require("../constants/error-types");
 const userService = require("../service/user.service");
 const md5password = require("../utils/password-handle");
+const authService = require("../service/auth.service");
 
+const { PUBLICE_KEY } = require("../app/config");
+
+/**验证用户是否存在 */
 const verifyLogin = async (ctx, next) => {
   // 1.获取用户名和密码
   const { name, password } = ctx.request.body;
@@ -29,6 +35,71 @@ const verifyLogin = async (ctx, next) => {
   ctx.user = user;
   await next();
 };
+
+/**验证登录用户token */
+const verifyAuth = async (ctx, next) => {
+  const token = ctx.headers.authorization;
+  if (!token) {
+    const error = new Error(errorTypes.UNAUTHORIZATION);
+    return ctx.app.emit("error", error, ctx);
+  }
+
+  try {
+    const result = jwt.verify(token, PUBLICE_KEY, {
+      algorithms: ["RS256"],
+    });
+    ctx.user = result;
+    await next();
+  } catch (err) {
+    const error = new Error(errorTypes.UNAUTHORIZATION);
+    ctx.app.emit("error", error, ctx);
+  }
+};
+
+/**
+ * 验证用户是否有权限
+ */
+const verifyPermission = async (ctx, next) => {
+  // 对参数进行解构，需要params 名 和 table 名一致
+  // 1.获取参数 { commentId: '1' }
+  const [resourceKey] = Object.keys(ctx.params);
+  const tableName = resourceKey.replace("Id", "");
+  const resourceId = ctx.params[resourceKey];
+  const { id } = ctx.user;
+
+  // 2.查询是否具备权限
+  try {
+    const isPermission = await authService.checkResource(tableName, resourceId, id);
+    if (!isPermission) throw new Error();
+    await next();
+  } catch (err) {
+    const error = new Error(errorTypes.UNPERMISSION);
+    return ctx.app.emit("error", error, ctx);
+  }
+};
+
+// const verifyPermission = (tableName) => {
+//   return async (ctx, next) => {
+//     console.log("验证权限的middleware~");
+
+//     // 1.获取参数
+//     const { momentId } = ctx.params;
+//     const { id } = ctx.user;
+
+//     // 2.查询是否具备权限
+//     try {
+//       const isPermission = await authService.checkResource(tableName, momentId, id);
+//       if (!isPermission) throw new Error();
+//       await next();
+//     } catch (err) {
+//       const error = new Error(errorTypes.UNPERMISSION);
+//       return ctx.app.emit("error", error, ctx);
+//     }
+//   };
+// };
+
 module.exports = {
   verifyLogin,
+  verifyAuth,
+  verifyPermission,
 };
