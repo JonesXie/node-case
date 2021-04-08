@@ -9,6 +9,7 @@ const { PUBLICE_KEY } = require("../app/config");
 
 /**验证用户是否存在 */
 const verifyLogin = async (ctx, next) => {
+  console.log("登录middleware");
   // 1.获取用户名和密码
   const { name, password } = ctx.request.body;
 
@@ -38,6 +39,7 @@ const verifyLogin = async (ctx, next) => {
 
 /**验证登录用户token */
 const verifyAuth = async (ctx, next) => {
+  console.log("验证登录用户token-middleware");
   const token = ctx.headers.authorization;
   if (!token) {
     const error = new Error(errorTypes.UNAUTHORIZATION);
@@ -60,6 +62,7 @@ const verifyAuth = async (ctx, next) => {
  * 验证用户是否有权限
  */
 const verifyPermission = async (ctx, next) => {
+  console.log("验证用户是否有权限-middleware");
   // 对参数进行解构，需要params 名 和 table 名一致
   // 1.获取参数 { commentId: '1' }
   const [resourceKey] = Object.keys(ctx.params);

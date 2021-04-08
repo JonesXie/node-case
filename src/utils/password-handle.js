@@ -3,7 +3,7 @@ const crypto = require("crypto");
 /**
  * 给密码加密
  * @param {string} password
- * @returns
+ * @returns boolean 布尔值
  */
 const md5password = (password) => {
   const md5 = crypto.createHash("md5"); // 创建 hash 为 md5 方法

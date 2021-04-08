@@ -10,6 +10,16 @@ class LabelController {
       res: result,
     };
   }
+
+  /**获取标签列表 */
+  async list(ctx, next) {
+    const { offset, size } = ctx.query;
+    const result = await service.getList(offset, size);
+    ctx.body = {
+      msg: "成功~",
+      res: result,
+    };
+  }
 }
 
 module.exports = new LabelController();
